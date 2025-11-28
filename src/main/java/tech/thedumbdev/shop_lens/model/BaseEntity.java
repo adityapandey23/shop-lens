@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,10 +17,9 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 public class BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JdbcTypeCode(SqlTypes.CHAR)
-    @Column(length = 36, updatable = false, nullable = false)
     @EqualsAndHashCode.Include
     @ToString.Include
     private UUID id;
@@ -31,9 +29,9 @@ public class BaseEntity {
     @ToString.Include
     private Instant createdAt;
 
-
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(nullable = false)
     @ToString.Include
     private Instant updatedAt;
+
 }

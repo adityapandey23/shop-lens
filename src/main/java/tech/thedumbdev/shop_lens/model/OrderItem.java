@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 @Entity
-@Table(name = "orders_line_items")
-public class OrderLineItem extends BaseEntity {
+@Table(name = "order_items")
+public class OrderItem extends BaseEntity {
 }
