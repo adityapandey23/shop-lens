@@ -1,8 +1,6 @@
 package tech.thedumbdev.shop_lens.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -34,5 +32,9 @@ public class User extends BaseEntity {
     @NotBlank
     @Column(nullable = false)
     private String password;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
 
 }

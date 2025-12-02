@@ -22,7 +22,7 @@ public class RefreshToken extends BaseEntity {
     @Column(nullable = false)
     private Instant expiresAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) // So that user can be logged in from multiple places
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
