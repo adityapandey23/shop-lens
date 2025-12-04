@@ -1,5 +1,6 @@
 package tech.thedumbdev.shop_lens.service.impl;
 
+import org.springframework.stereotype.Service;
 import tech.thedumbdev.shop_lens.dto.AuthResponse;
 import tech.thedumbdev.shop_lens.dto.SignInRequest;
 import tech.thedumbdev.shop_lens.dto.SignUpRequest;
@@ -7,8 +8,12 @@ import tech.thedumbdev.shop_lens.dto.VerifyEmailRequest;
 import tech.thedumbdev.shop_lens.model.User;
 import tech.thedumbdev.shop_lens.repository.UserRepo;
 import tech.thedumbdev.shop_lens.service.*;
+import tech.thedumbdev.shop_lens.service.exceptions.*;
 import tech.thedumbdev.shop_lens.util.HashUtil;
 
+import java.util.UUID;
+
+@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepo userRepo;
     private final OtpService otpService;
@@ -31,9 +36,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthResponse signUp(SignUpRequest request) {
+    public AuthResponse signUp(SignUpRequest request) throws UserException {
         if(userRepo.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new DuplicateUserException("User already exists");
         }
 
         User user = new User();
@@ -45,19 +50,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         userRepo.save(user);
 
-        return sendVerificationHelper(user, "OTP sent");
+        return sendVerificationHelper(user);
     }
 
     @Override
-    public AuthResponse verifyEmail(VerifyEmailRequest request) {
+    public AuthResponse verifyEmail(VerifyEmailRequest request) throws UserException, JwtException, OtpException {
         if(!jwtService.verifyVerificationToken(request.verificationToken())) {
-            throw new RuntimeException("Invalid verification token");
+            throw new InvalidJwtException("Invalid verification token");
         }
 
-        User user = userRepo.findByEmail(request.email()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findByEmail(request.email()).orElseThrow(() -> new NotFoundUserException("User not found"));
 
         if(!otpService.validateOtp(user.getEmail(), request.otp())) {
-            throw new RuntimeException("Invalid OTP");
+            throw new InvalidOtpException("Invalid OTP");
         }
 
         user.setVerified(true);
@@ -70,16 +75,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthResponse signIn(SignInRequest request) {
+    public AuthResponse signIn(SignInRequest request) throws UserException {
         User user = userRepo.findByEmail(request.email()).orElseThrow(() -> new RuntimeException("User doesn't exist"));
 
         String hashedPassword = hashUtil.Hasher(request.password());
         if (!user.getPassword().equals(hashedPassword)) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsUserException("Password doesn't match");
         }
 
         if (!user.isVerified()) {
-            throw new RuntimeException("Account not verified"); // Do call the reverify route
+            throw new UnverifiedUserException("Account not verified"); // Do call the reverify route
         }
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -89,22 +94,36 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthResponse sendVerification(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public AuthResponse sendVerification(String email) throws UserException {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundUserException("User not found"));
 
         if (user.isVerified()) {
-            throw new RuntimeException("User already verified");
+            throw new DuplicateUserException("User already verified");
         }
 
-        return sendVerificationHelper(user, "OTP resent");
+        return sendVerificationHelper(user);
+    }
+
+    @Override
+    public AuthResponse refreshToken(String refreshToken) throws UserException, JwtException {
+        if (!jwtService.verifyRefreshToken(refreshToken)) {
+            throw new InvalidJwtException("Invalid or expired refresh token");
+        }
+
+        UUID userId = jwtService.extractUserId(refreshToken);
+        User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundUserException("User not found"));
+
+        String accessToken = jwtService.generateAccessToken(user);
+
+        return new AuthResponse(accessToken, refreshToken, null, "Refresh token verified");
     }
 
     // Helper function
-    private AuthResponse sendVerificationHelper(User user, String message) {
+    private AuthResponse sendVerificationHelper(User user) {
         String otp = otpService.generateAndStoreOtp(user.getEmail());
         emailService.sendOtpEmail(user.getEmail(), otp);
         String verificationToken = jwtService.generateVerificationToken(user);
 
-        return new AuthResponse(null, null, verificationToken, message);
+        return new AuthResponse(null, null, verificationToken, "OTP sent");
     }
 }

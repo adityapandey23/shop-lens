@@ -3,6 +3,8 @@ package tech.thedumbdev.shop_lens.service;
 import tech.thedumbdev.shop_lens.model.User;
 import tech.thedumbdev.shop_lens.model.enums.TokenType;
 
+import java.util.UUID;
+
 public interface JwtService {
 
     public String generateToken(User user, TokenType tokenType, long duration);
@@ -28,4 +30,6 @@ public interface JwtService {
     }
 
     public boolean verifyRefreshToken(final String refreshToken);
+
+    public UUID extractUserId(final String token);
 }

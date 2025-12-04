@@ -3,6 +3,7 @@ package tech.thedumbdev.shop_lens.service.impl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import tech.thedumbdev.shop_lens.model.RefreshToken;
 import tech.thedumbdev.shop_lens.model.User;
 import tech.thedumbdev.shop_lens.model.enums.TokenType;
@@ -16,7 +17,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Service
 public class JwtServiceImpl implements JwtService {
 
     @Value("${application.security.jwt.secret-key}")
@@ -111,6 +114,18 @@ public class JwtServiceImpl implements JwtService {
                     return true;
                 })
                 .orElse(false); // Token not found in DB (Revoked)
+    }
+
+    @Override
+    public UUID extractUserId(String token) {
+        String userIdString = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+
+        return UUID.fromString(userIdString);
     }
 
     // Helper function

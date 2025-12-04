@@ -1,11 +1,13 @@
 package tech.thedumbdev.shop_lens.service.impl;
 
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.stereotype.Service;
 import tech.thedumbdev.shop_lens.service.OtpService;
 
 import java.time.Duration;
 import java.util.Random;
 
+@Service
 public class OtpServiceImpl implements OtpService {
 
     private final ReactiveStringRedisTemplate redisTemplate;

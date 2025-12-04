@@ -9,13 +9,16 @@ import tech.thedumbdev.shop_lens.service.EmailService;
 
 @Service
 public class EmailServiceImpl implements EmailService {
-    @Value("${resend.from.email:onboarding@resend.dev}")
-    private String fromEmail;
 
+    private final String fromEmail;
     private final Resend resend;
 
-    EmailServiceImpl(@Value("${resend.api.key}") String apiKey) {
+    EmailServiceImpl(
+            @Value("${resend.api.key}") String apiKey,
+            @Value("${resend.from.email}") String fromEmail
+) {
         this.resend = new Resend(apiKey);
+        this.fromEmail = fromEmail;
     }
 
     @Override
