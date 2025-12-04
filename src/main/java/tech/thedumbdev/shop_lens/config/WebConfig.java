@@ -13,6 +13,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed HTTP methods
                 .allowedHeaders("*") // Allow all headers
                 .allowCredentials(true) // Allow sending credentials (cookies, auth headers)
-                .maxAge(3600); //
+                .maxAge(3600);
     }
 }

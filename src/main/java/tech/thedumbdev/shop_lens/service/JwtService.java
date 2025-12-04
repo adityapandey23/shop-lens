@@ -17,6 +17,8 @@ public interface JwtService {
         return generateToken(user, TokenType.ACCESS_TOKEN, 1000 * 60 * 60); // 60 mins
     }
 
+    public String generateRefreshToken(final User user);
+
     public default boolean verifyVerificationToken(final String verificationToken) {
         return verifyToken(verificationToken, TokenType.VERIFICATION_TOKEN);
     }
@@ -24,4 +26,6 @@ public interface JwtService {
     public default boolean verifyAccessToken(final String accessToken) {
         return verifyToken(accessToken, TokenType.ACCESS_TOKEN);
     }
+
+    public boolean verifyRefreshToken(final String refreshToken);
 }

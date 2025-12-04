@@ -33,6 +33,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private boolean isVerified = false;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tenant_id")
     private Tenant tenant;
