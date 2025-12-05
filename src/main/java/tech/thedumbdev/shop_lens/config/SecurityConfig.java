@@ -32,7 +32,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",      // Login, Register, Health, etc.
                                 "/v3/api-docs/**",      // Swagger docs (optional)
                                 "/swagger-ui/**",       // Swagger UI (optional)
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/v1/shopify/callback" // Allow callback public access
                         ).permitAll()
 
                         // Require authentication for EVERYTHING else
