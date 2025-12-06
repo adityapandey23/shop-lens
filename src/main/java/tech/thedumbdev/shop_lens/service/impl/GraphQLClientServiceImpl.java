@@ -10,10 +10,10 @@ import java.util.Map;
 public class GraphQLClientServiceImpl implements GraphQLClientService {
     private final HttpGraphQlClient graphQlClient;
 
-    public GraphQLClientServiceImpl(String baseUrl, String bearerToken) {
+    public GraphQLClientServiceImpl(String baseUrl, String accessToken) {
         WebClient webClient = WebClient.builder()
                 .baseUrl(baseUrl)
-                .defaultHeader("Authorization", "Bearer " + bearerToken)
+                .defaultHeader("X-Shopify-Access-Token", accessToken)
                 .build();
         this.graphQlClient = HttpGraphQlClient.create(webClient);
     }
@@ -23,7 +23,12 @@ public class GraphQLClientServiceImpl implements GraphQLClientService {
         return graphQlClient.document(document) // The GraphQL query string
                 .operationName(operationName) // Optional: name of the query/mutation
                 .variables(variables) // Optional: a map of variables
-                .retrieve("fieldName") // The field in the 'data' part of the response to retrieve
-                .toEntity(responseType); // Decode the response to a Java object
+                .execute()
+                .map(response -> {
+                    if (!response.isValid()) {
+                        throw new RuntimeException("GraphQL Errors: " + response.getErrors());
+                    }
+                    return response.toEntity(responseType);
+                });
     }
 }

@@ -4,19 +4,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tech.thedumbdev.shop_lens.model.User;
-import tech.thedumbdev.shop_lens.service.ShopifyService;
+import tech.thedumbdev.shop_lens.service.ShopifyOauthService;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/shopify")
 public class ShopifyController {
 
-    private final ShopifyService shopifyService;
+    private final ShopifyOauthService shopifyOauthService;
 
-    public ShopifyController(ShopifyService shopifyService) {
-        this.shopifyService = shopifyService;
+    public ShopifyController(ShopifyOauthService shopifyOauthService) {
+        this.shopifyOauthService = shopifyOauthService;
     }
 
     @GetMapping("/install")
@@ -24,7 +23,7 @@ public class ShopifyController {
             @AuthenticationPrincipal User user, // User is required to start the flow
             @RequestParam String shop
     ) {
-        String url = shopifyService.getAuthorizationUrl(shop, user);
+        String url = shopifyOauthService.getAuthorizationUrl(shop, user);
         return ResponseEntity.ok(Map.of("url", url));
     }
 
@@ -37,7 +36,7 @@ public class ShopifyController {
             @RequestParam("state") String state,
             @RequestParam("timestamp")String timestamp
             ) {
-        shopifyService.handleOAuthCallback(
+        shopifyOauthService.handleOAuthCallback(
                 code, hmac, host, shop, state, timestamp
         );
         return ResponseEntity.ok("App installed successfully");

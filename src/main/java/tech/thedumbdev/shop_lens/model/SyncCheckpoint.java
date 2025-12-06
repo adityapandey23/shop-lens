@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import tech.thedumbdev.shop_lens.model.enums.EntityType;
 import tech.thedumbdev.shop_lens.model.enums.SyncStatusType;
 
 @Getter
@@ -13,19 +12,27 @@ import tech.thedumbdev.shop_lens.model.enums.SyncStatusType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sync_jobs")
-public class SyncJob extends BaseEntity {
+@Table(name = "sync_checkpoints")
+public class SyncCheckpoint extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
-    private Tenant tenant;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EntityType entityType;
+    @JoinColumn(name = "job_id", nullable = false)
+    private SyncJob job;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SyncStatusType status;
 
+    // Cursor for fetching the next page (null means start from beginning)
+    @Column
+    private String lastCursor;
+
+    @Column
+    private Integer totalPagesProcessed;
+
+    @Column
+    private Integer totalRecordsProcessed;
+
+    @Column(length = 1000)
+    private String errorMessage;
 }

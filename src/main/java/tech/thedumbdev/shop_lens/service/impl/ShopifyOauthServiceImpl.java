@@ -8,7 +8,7 @@ import tech.thedumbdev.shop_lens.model.Tenant;
 import tech.thedumbdev.shop_lens.model.User;
 import tech.thedumbdev.shop_lens.repository.TenantRepo;
 import tech.thedumbdev.shop_lens.repository.UserRepo;
-import tech.thedumbdev.shop_lens.service.ShopifyService;
+import tech.thedumbdev.shop_lens.service.ShopifyOauthService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ShopifyServiceImpl implements ShopifyService {
+public class ShopifyOauthServiceImpl implements ShopifyOauthService {
 
     private String apiKey;
     private String apiSecret;
@@ -28,7 +28,7 @@ public class ShopifyServiceImpl implements ShopifyService {
     private final UserRepo userRepo;
     private final RestTemplate restTemplate;
 
-    public ShopifyServiceImpl(
+    public ShopifyOauthServiceImpl(
             TenantRepo tenantRepo,
             UserRepo userRepo,
             @Value("${shopify.api.key}") String apiKey,
@@ -108,6 +108,7 @@ public class ShopifyServiceImpl implements ShopifyService {
         }
     }
 
+    // Helper Function
     private void saveTenantToken(User user, String shop, String accessToken) {
         Optional<Tenant> existingTenant = tenantRepo.findByShopDomain(shop);
 
